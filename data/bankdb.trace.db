@@ -1,3 +1,6 @@
 2025-11-10 22:13:46.416192Z jdbc[3]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CUSTOMERS" not found; SQL statement:
 INSERT INTO customers(first_name,last_name,address) VALUES(?,?,?) [42102-224]
+2025-11-23 00:09:08.446780Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "CUSTOMERS" not found; SQL statement:
+INSERT INTO customers(first_name,last_name,address) VALUES(?,?,?) [42102-224]
