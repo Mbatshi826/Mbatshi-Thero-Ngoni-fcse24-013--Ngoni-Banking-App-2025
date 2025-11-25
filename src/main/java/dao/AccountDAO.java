@@ -11,7 +11,7 @@ import java.util.List;
 public class AccountDAO {
 
     public long create(Account account, long customerId) throws SQLException {
-        String sql = "INSERT INTO account(account_number, customer_id, type, balance, branch) VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO account(account_number, customer_id, type, balance, branch, company_name) VALUES(?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, account.getAccountNumber());
@@ -19,6 +19,11 @@ public class AccountDAO {
             ps.setString(3, account.getClass().getSimpleName().toUpperCase().replace("ACCOUNT", ""));
             ps.setBigDecimal(4, account.getBalance());
             ps.setString(5, account.getBranch());
+            if (account instanceof ChequeAccount) {
+                ps.setString(6, ((ChequeAccount) account).getCompanyName());
+            } else {
+                ps.setNull(6, Types.VARCHAR);
+            }
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
@@ -74,6 +79,7 @@ public class AccountDAO {
         String branch = rs.getString("branch");
         long id = rs.getLong("id");
         long customerId = rs.getLong("customer_id");
+        String companyName = rs.getString("company_name");
 
         // create a minimal Customer holder for owner (only id)
         Customer owner = new Customer("","",null);
@@ -82,7 +88,7 @@ public class AccountDAO {
         Account acc;
         if ("SAVINGS".equalsIgnoreCase(type)) acc = new SavingsAccount(owner, bal, branch, accNum);
         else if ("INVESTMENT".equalsIgnoreCase(type)) acc = new InvestmentAccount(owner, bal, branch, accNum);
-        else acc = new ChequeAccount(owner, bal, branch, accNum, "UNKNOWN", "UNKNOWN");
+        else acc = new ChequeAccount(owner, bal, branch, accNum, companyName);
 
         acc.setId(id);
         return acc;

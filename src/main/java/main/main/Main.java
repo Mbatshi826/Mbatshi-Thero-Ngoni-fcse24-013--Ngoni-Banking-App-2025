@@ -26,6 +26,7 @@ public class Main {
                 "type VARCHAR(255) NOT NULL, " +
                 "balance DECIMAL(15, 2) NOT NULL, " +
                 "branch VARCHAR(255) NOT NULL, " +
+                "company_name VARCHAR(255), " + // Added for ChequeAccount
                 "FOREIGN KEY (customer_id) REFERENCES customer(id));";
         String transaction = "CREATE TABLE IF NOT EXISTS transaction ( " +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
