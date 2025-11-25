@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.2-ea" fx:controller="controller.CustomerController">
+    <Label text="Register Customer"/>
+    <TextField fx:id="firstNameField" promptText="First Name"/>
+    <TextField fx:id="lastNameField" promptText="Last Name"/>
+    <TextField fx:id="idNumberField" promptText="ID Number"/>
+    <TextField fx:id="addressField" promptText="Address"/>
+    <TextField fx:id="phoneField" promptText="Phone"/>
+    <TextField fx:id="emailField" promptText="Email"/>
+    <CheckBox fx:id="isEmployedCheckBox" text="Is Employed"/>
+    <TextField fx:id="employerNameField" promptText="Employer Name"/>
+    <TextField fx:id="employerAddressField" promptText="Employer Address"/>
+    <Button text="Register Customer" onAction="#registerCustomer"/>
+    <Label fx:id="messageLabel"/>
+</VBox>
