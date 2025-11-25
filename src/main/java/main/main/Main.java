@@ -35,12 +35,18 @@ public class Main {
                 "type VARCHAR(255) NOT NULL, " +
                 "timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
                 "FOREIGN KEY (account_id) REFERENCES account(id));";
+        String user = "CREATE TABLE IF NOT EXISTS user ( " +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "username VARCHAR(255) NOT NULL UNIQUE, " +
+                "password_hash VARCHAR(255) NOT NULL, " +
+                "user_type VARCHAR(255) NOT NULL);";
 
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement()) {
             st.execute(customer);
             st.execute(account);
             st.execute(transaction);
+            st.execute(user);
         } catch (SQLException e) {
             System.err.println("Error initializing database: " + e.getMessage());
             e.printStackTrace();
