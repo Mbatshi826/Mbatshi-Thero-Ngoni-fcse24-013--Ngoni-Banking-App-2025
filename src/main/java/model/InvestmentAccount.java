@@ -14,10 +14,12 @@ public class InvestmentAccount extends Account implements InterestBearing {
 
     @Override
     public boolean withdraw(BigDecimal amount) {
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("withdraw>0");
-        if (balance.compareTo(amount) < 0) throw new IllegalArgumentException("Insufficient funds");
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Withdrawal amount must be positive");
+        if (balance.compareTo(amount) < 0) {
+            return false; // Insufficient funds
+        }
         balance = balance.subtract(amount);
-        return false;
+        return true;
     }
 
     @Override
@@ -29,7 +31,6 @@ public class InvestmentAccount extends Account implements InterestBearing {
 
     @Override
     public String getBranch() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBranch'");
+        return super.getBranch();
     }
 }
