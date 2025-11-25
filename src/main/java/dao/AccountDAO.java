@@ -11,12 +11,12 @@ import java.util.List;
 public class AccountDAO {
 
     public long create(Account account, long customerId) throws SQLException {
-        String sql = "INSERT INTO accounts(account_number, customer_id, account_type, balance, branch) VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO account(account_number, customer_id, type, balance, branch) VALUES(?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, account.getAccountNumber());
             ps.setLong(2, customerId);
-            ps.setString(3, account.getClass().getSimpleName().toUpperCase());
+            ps.setString(3, account.getClass().getSimpleName().toUpperCase().replace("ACCOUNT", ""));
             ps.setBigDecimal(4, account.getBalance());
             ps.setString(5, account.getBranch());
             ps.executeUpdate();
@@ -32,7 +32,7 @@ public class AccountDAO {
     }
 
     public Account findByAccountNumber(long accountNumber) throws SQLException {
-        String sql = "SELECT * FROM accounts WHERE account_number=?";
+        String sql = "SELECT * FROM account WHERE account_number=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, accountNumber);
@@ -46,7 +46,7 @@ public class AccountDAO {
 
     public List<Account> findByCustomerId(long customerId) throws SQLException {
         List<Account> list = new ArrayList<>();
-        String sql = "SELECT * FROM accounts WHERE customer_id=?";
+        String sql = "SELECT * FROM account WHERE customer_id=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, customerId);
@@ -58,7 +58,7 @@ public class AccountDAO {
     }
 
     public boolean updateBalance(long accountId, BigDecimal newBalance) throws SQLException {
-        String sql = "UPDATE accounts SET balance=? WHERE id=?";
+        String sql = "UPDATE account SET balance=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBigDecimal(1, newBalance);
@@ -68,7 +68,7 @@ public class AccountDAO {
     }
 
     private Account mapRowToAccount(ResultSet rs) throws SQLException {
-        String type = rs.getString("account_type");
+        String type = rs.getString("type");
         long accNum = rs.getLong("account_number");
         BigDecimal bal = rs.getBigDecimal("balance");
         String branch = rs.getString("branch");
