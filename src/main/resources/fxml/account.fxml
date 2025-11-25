@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
 <VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.2-ea" fx:controller="controller.AccountController">
-    <Label text="Customer Accounts"/>
-    <TableView fx:id="accountsTable"/>
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Button text="Create Account" onAction="#createAccount"/>
-        <Button text="View Accounts" onAction="#viewAccounts"/>
-    </HBox>
+    <ListView fx:id="accountListView"/>
+
+    <VBox spacing="5" alignment="CENTER_LEFT">
+        <Label fx:id="accountTypeLabel"/>
+        <Label fx:id="balanceLabel"/>
+        <Label fx:id="customerNameLabel"/>
+    </VBox>
 
     <HBox spacing="10" alignment="CENTER">
         <TextField fx:id="accountNumberField" promptText="Account Number"/>
@@ -26,6 +31,6 @@
         <Button text="Withdraw" onAction="#withdraw"/>
         <Button text="Apply Interest" onAction="#applyInterest"/>
     </HBox>
-    
+
     <Label fx:id="messageLabel"/>
 </VBox>

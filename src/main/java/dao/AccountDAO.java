@@ -1,96 +1,112 @@
 package dao;
 
-import model.*;
+import model.Account;
 import util.DBConnection;
 
-import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AccountDAO {
 
-    public long create(Account account, long customerId) throws SQLException {
-        String sql = "INSERT INTO account(accountNumber, customerId, type, balance, branch, companyName) VALUES(?,?,?,?,?,?)";
+    public void add(Account account) throws SQLException {
+        String sql = "INSERT INTO Account (accountNumber, customerId, type, balance, branch, companyName) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setLong(1, account.getAccountNumber());
-            ps.setLong(2, customerId);
-            ps.setString(3, account.getClass().getSimpleName().toUpperCase().replace("ACCOUNT", ""));
-            ps.setBigDecimal(4, account.getBalance());
-            ps.setString(5, account.getBranch());
-            if (account instanceof ChequeAccount) {
-                ps.setString(6, ((ChequeAccount) account).getCompanyName());
-            } else {
-                ps.setNull(6, Types.VARCHAR);
-            }
-            ps.executeUpdate();
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    long id = rs.getLong(1);
-                    account.setId(id);
-                    return id;
-                }
-            }
-            return -1;
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, account.getAccountNumber());
+            pstmt.setLong(2, account.getCustomerId());
+            pstmt.setString(3, account.getType());
+            pstmt.setDouble(4, account.getBalance());
+            pstmt.setString(5, account.getBranch());
+            pstmt.setString(6, account.getCompanyName());
+            pstmt.executeUpdate();
         }
     }
 
-    public Account findByAccountNumber(long accountNumber) throws SQLException {
-        String sql = "SELECT * FROM account WHERE accountNumber=?";
+    public Account findById(long id) throws SQLException {
+        String sql = "SELECT * FROM Account WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, accountNumber);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next())
-                    return mapRowToAccount(rs);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Account(
+                            rs.getLong("id"),
+                            rs.getLong("accountNumber"),
+                            rs.getLong("customerId"),
+                            rs.getString("type"),
+                            rs.getDouble("balance"),
+                            rs.getString("branch"),
+                            rs.getString("companyName")
+                    );
+                }
             }
         }
         return null;
     }
 
-    public List<Account> findByCustomerId(long customerId) throws SQLException {
-        List<Account> list = new ArrayList<>();
-        String sql = "SELECT * FROM account WHERE customerId=?";
+    public Account findByAccountNumber(long accountNumber) throws SQLException {
+        String sql = "SELECT * FROM Account WHERE accountNumber = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, customerId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRowToAccount(rs));
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, accountNumber);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Account(
+                            rs.getLong("id"),
+                            rs.getLong("accountNumber"),
+                            rs.getLong("customerId"),
+                            rs.getString("type"),
+                            rs.getDouble("balance"),
+                            rs.getString("branch"),
+                            rs.getString("companyName")
+                    );
+                }
             }
         }
-        return list;
+        return null;
     }
 
-    public boolean updateBalance(long accountId, BigDecimal newBalance) throws SQLException {
-        String sql = "UPDATE account SET balance=? WHERE id=?";
+    public List<Account> findAll() throws SQLException {
+        List<Account> accounts = new ArrayList<>();
+        String sql = "SELECT * FROM Account";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBigDecimal(1, newBalance);
-            ps.setLong(2, accountId);
-            return ps.executeUpdate() > 0;
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                accounts.add(new Account(
+                        rs.getLong("id"),
+                        rs.getLong("accountNumber"),
+                        rs.getLong("customerId"),
+                        rs.getString("type"),
+                        rs.getDouble("balance"),
+                        rs.getString("branch"),
+                        rs.getString("companyName")
+                ));
+            }
+        }
+        return accounts;
+    }
+
+    public void update(Account account) throws SQLException {
+        String sql = "UPDATE Account SET balance = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDouble(1, account.getBalance());
+            pstmt.setLong(2, account.getId());
+            pstmt.executeUpdate();
         }
     }
 
-    private Account mapRowToAccount(ResultSet rs) throws SQLException {
-        String type = rs.getString("type");
-        long accNum = rs.getLong("accountNumber");
-        BigDecimal bal = rs.getBigDecimal("balance");
-        String branch = rs.getString("branch");
-        long id = rs.getLong("id");
-        long customerId = rs.getLong("customerId");
-        String companyName = rs.getString("companyName");
-
-        // create a minimal Customer holder for owner (only id)
-        Customer owner = new Customer("","",null);
-        owner.setId(customerId);
-
-        Account acc;
-        if ("SAVINGS".equalsIgnoreCase(type)) acc = new SavingsAccount(owner, bal, branch, accNum);
-        else if ("INVESTMENT".equalsIgnoreCase(type)) acc = new InvestmentAccount(owner, bal, branch, accNum);
-        else acc = new ChequeAccount(owner, bal, branch, accNum, companyName);
-
-        acc.setId(id);
-        return acc;
+    public void delete(long id) throws SQLException {
+        String sql = "DELETE FROM Account WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, id);
+            pstmt.executeUpdate();
+        }
     }
 }

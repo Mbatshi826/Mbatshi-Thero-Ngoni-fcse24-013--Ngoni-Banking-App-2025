@@ -12,4 +12,5 @@
     <Label text="Password"/>
     <PasswordField fx:id="passwordField"/>
     <Button text="Login" onAction="#login"/>
+    <Label fx:id="messageLabel"/>
 </VBox>

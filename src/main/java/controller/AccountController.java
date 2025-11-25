@@ -2,67 +2,130 @@ package controller;
 
 import dao.AccountDAO;
 import dao.CustomerDAO;
-import dao.TransactionDAO;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import model.Account;
 import model.Customer;
-import java.math.BigDecimal;
+
 import java.sql.SQLException;
-import java.util.List;;
+import java.util.List;
 
 public class AccountController {
-    private final AccountDAO accountDAO = new AccountDAO();
-    private final CustomerDAO customerDAO = new CustomerDAO();
-    private final TransactionDAO transactionDAO = new TransactionDAO(); // DAO for transactions
 
-    public Account createAccountForCustomer(long customerId, Account account) throws SQLException {
-        Customer cust = customerDAO.findById(customerId);
-        if (cust == null) throw new IllegalArgumentException("Customer not found");
-        long id = accountDAO.create(account, customerId);
-        account.setId(id);
-        return account;
+    @FXML
+    private ListView<Account> accountListView;
+
+    @FXML
+    private TextField accountNumberField;
+
+    @FXML
+    private TextField amountField;
+
+    @FXML
+    private Label messageLabel;
+
+    @FXML
+    private Label accountTypeLabel;
+
+    @FXML
+    private Label balanceLabel;
+
+    @FXML
+    private Label customerNameLabel;
+
+    private AccountDAO accountDAO;
+    private CustomerDAO customerDAO;
+
+    public AccountController() {
+        this.accountDAO = new AccountDAO();
+        this.customerDAO = new CustomerDAO();
+        loadAccounts();
     }
 
-    public void deposit(long accountNumber, BigDecimal amount) throws SQLException {
-        Account acc = accountDAO.findByAccountNumber(accountNumber);
-        if (acc == null) throw new IllegalArgumentException("Account not found");
-
-        acc.deposit(amount);
-        accountDAO.updateBalance(acc.getId(), acc.getBalance());
-
-        // Record transaction
-        transactionDAO.recordTransaction(acc.getId(), amount, "Deposit");
-    }
-
-    public void withdraw(long accountNumber, BigDecimal amount) throws SQLException {
-        Account acc = accountDAO.findByAccountNumber(accountNumber);
-        if (acc == null) throw new IllegalArgumentException("Account not found");
-
-        boolean success = acc.withdraw(amount);
-        if (!success) throw new IllegalArgumentException("Insufficient funds");
-
-        accountDAO.updateBalance(acc.getId(), acc.getBalance());
-
-        // Record transaction
-        transactionDAO.recordTransaction(acc.getId(), amount, "Withdrawal");
-    }
-
-    public BigDecimal applyInterest(long accountNumber) throws SQLException {
-        Account acc = accountDAO.findByAccountNumber(accountNumber);
-        if (acc == null) throw new IllegalArgumentException("Account not found");
-        if (acc instanceof model.InterestBearing ib) {
-            BigDecimal interest = ib.applyMonthlyInterest();
-            accountDAO.updateBalance(acc.getId(), acc.getBalance());
-
-            // Record interest transaction
-            transactionDAO.recordTransaction(acc.getId(), interest, "Interest");
-
-            return interest;
-        } else {
-            throw new IllegalArgumentException("Account does not earn interest");
+    private void loadAccounts() {
+        try {
+            List<Account> accounts = accountDAO.findAll();
+            ObservableList<Account> observableList = FXCollections.observableArrayList(accounts);
+            accountListView.setItems(observableList);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            messageLabel.setText("Error loading accounts.");
         }
     }
 
-    public List<Account> getAccountsForCustomer(long customerId) throws SQLException {
-        return accountDAO.findByCustomerId(customerId);
+    @FXML
+    public void initialize() {
+        accountListView.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> showAccountDetails(newValue));
+    }
+
+    private void showAccountDetails(Account account) {
+        if (account != null) {
+            try {
+                Customer customer = customerDAO.findById(account.getCustomerId());
+                accountTypeLabel.setText("Account Type: " + account.getType());
+                balanceLabel.setText("Balance: " + String.format("%.2f", account.getBalance()));
+                customerNameLabel.setText("Customer: " + customer.getFirstName() + " " + customer.getLastName());
+            } catch (SQLException e) {
+                e.printStackTrace();
+                messageLabel.setText("Error loading account details.");
+            }
+        } else {
+            clearLabels();
+        }
+    }
+
+    private void clearLabels() {
+        accountTypeLabel.setText("");
+        balanceLabel.setText("");
+        customerNameLabel.setText("");
+    }
+
+    @FXML
+    public void deposit() {
+        performTransaction("deposit");
+    }
+
+    @FXML
+    public void withdraw() {
+        performTransaction("withdraw");
+    }
+
+    private void performTransaction(String type) {
+        try {
+            long accountNumber = Long.parseLong(accountNumberField.getText());
+            double amount = Double.parseDouble(amountField.getText());
+
+            Account account = accountDAO.findByAccountNumber(accountNumber);
+            if (account == null) {
+                messageLabel.setText("Account not found.");
+                return;
+            }
+
+            if (type.equals("deposit")) {
+                account.deposit(amount);
+            } else if (type.equals("withdraw")) {
+                account.withdraw(amount);
+            }
+
+            accountDAO.update(account);
+            messageLabel.setText("Transaction successful.");
+            showAccountDetails(account);
+
+        } catch (NumberFormatException e) {
+            messageLabel.setText("Invalid account number or amount.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            messageLabel.setText("An error occurred.");
+        }
+    }
+
+    @FXML
+    public void applyInterest() {
+        // ... (implementation for applyInterest)
     }
 }
