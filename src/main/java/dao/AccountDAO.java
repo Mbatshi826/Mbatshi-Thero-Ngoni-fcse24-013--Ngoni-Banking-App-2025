@@ -11,7 +11,7 @@ import java.util.List;
 public class AccountDAO {
 
     public long create(Account account, long customerId) throws SQLException {
-        String sql = "INSERT INTO account(account_number, customer_id, type, balance, branch, company_name) VALUES(?,?,?,?,?,?)";
+        String sql = "INSERT INTO account(accountNumber, customerId, type, balance, branch, companyName) VALUES(?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, account.getAccountNumber());
@@ -37,7 +37,7 @@ public class AccountDAO {
     }
 
     public Account findByAccountNumber(long accountNumber) throws SQLException {
-        String sql = "SELECT * FROM account WHERE account_number=?";
+        String sql = "SELECT * FROM account WHERE accountNumber=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, accountNumber);
@@ -51,7 +51,7 @@ public class AccountDAO {
 
     public List<Account> findByCustomerId(long customerId) throws SQLException {
         List<Account> list = new ArrayList<>();
-        String sql = "SELECT * FROM account WHERE customer_id=?";
+        String sql = "SELECT * FROM account WHERE customerId=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, customerId);
@@ -74,12 +74,12 @@ public class AccountDAO {
 
     private Account mapRowToAccount(ResultSet rs) throws SQLException {
         String type = rs.getString("type");
-        long accNum = rs.getLong("account_number");
+        long accNum = rs.getLong("accountNumber");
         BigDecimal bal = rs.getBigDecimal("balance");
         String branch = rs.getString("branch");
         long id = rs.getLong("id");
-        long customerId = rs.getLong("customer_id");
-        String companyName = rs.getString("company_name");
+        long customerId = rs.getLong("customerId");
+        String companyName = rs.getString("companyName");
 
         // create a minimal Customer holder for owner (only id)
         Customer owner = new Customer("","",null);

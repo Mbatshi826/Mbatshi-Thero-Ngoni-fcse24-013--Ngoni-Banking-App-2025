@@ -22,7 +22,7 @@ public class Main {
         String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
         String userType = "customer";
 
-        String sql = "INSERT INTO user (username, password_hash, user_type) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE password_hash = ?;";
+        String sql = "INSERT INTO user (username, passwordHash, userType) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE passwordHash = ?;";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -39,30 +39,30 @@ public class Main {
     private static void initDB() {
         String customer = "CREATE TABLE IF NOT EXISTS customer ( " +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                "first_name VARCHAR(255) NOT NULL, " +
-                "last_name VARCHAR(255) NOT NULL, " +
+                "firstName VARCHAR(255) NOT NULL, " +
+                "lastName VARCHAR(255) NOT NULL, " +
                 "address VARCHAR(255) NOT NULL);";
         String account = "CREATE TABLE IF NOT EXISTS account ( " +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                "account_number BIGINT NOT NULL UNIQUE, " +
-                "customer_id INT NOT NULL, " +
+                "accountNumber BIGINT NOT NULL UNIQUE, " +
+                "customerId INT NOT NULL, " +
                 "type VARCHAR(255) NOT NULL, " +
                 "balance DECIMAL(15, 2) NOT NULL, " +
                 "branch VARCHAR(255) NOT NULL, " +
-                "company_name VARCHAR(255), " + // Added for ChequeAccount
-                "FOREIGN KEY (customer_id) REFERENCES customer(id));";
+                "companyName VARCHAR(255), " + // Added for ChequeAccount
+                "FOREIGN KEY (customerId) REFERENCES customer(id));";
         String transaction = "CREATE TABLE IF NOT EXISTS transaction ( " +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
-                "account_id INT NOT NULL, " +
+                "accountId INT NOT NULL, " +
                 "amount DECIMAL(15, 2) NOT NULL, " +
                 "type VARCHAR(255) NOT NULL, " +
                 "timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
-                "FOREIGN KEY (account_id) REFERENCES account(id));";
+                "FOREIGN KEY (accountId) REFERENCES account(id));";
         String user = "CREATE TABLE IF NOT EXISTS user ( " +
                 "id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "username VARCHAR(255) NOT NULL UNIQUE, " +
-                "password_hash VARCHAR(255) NOT NULL, " +
-                "user_type VARCHAR(255) NOT NULL);";
+                "passwordHash VARCHAR(255) NOT NULL, " +
+                "userType VARCHAR(255) NOT NULL);";
 
         try (Connection conn = DBConnection.getConnection();
              Statement st = conn.createStatement()) {

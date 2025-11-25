@@ -7,17 +7,22 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.SQLException;
 
 public class LoginController {
-    private UserDAO userDAO = new UserDAO();
 
-    public boolean authenticate(String username, String password) {
+    private UserDAO userDAO;
+
+    public LoginController() {
+        this.userDAO = new UserDAO();
+    }
+
+    public boolean login(String username, String password) {
         try {
             User user = userDAO.findByUsername(username);
-            if (user != null) {
-                return BCrypt.checkpw(password, user.getPasswordHash());
+            if (user != null && BCrypt.checkpw(password, user.getPasswordHash())) {
+                return true; // Successful login
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
+        return false; // Failed login
     }
 }

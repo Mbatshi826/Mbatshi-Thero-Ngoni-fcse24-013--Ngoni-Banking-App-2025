@@ -19,8 +19,8 @@ public class UserDAO {
                 if (rs.next()) {
                     User user = new User(
                             rs.getString("username"),
-                            rs.getString("password_hash"),
-                            rs.getString("user_type")
+                            rs.getString("passwordHash"),
+                            rs.getString("userType")
                     );
                     user.setId(rs.getLong("id"));
                     return user;

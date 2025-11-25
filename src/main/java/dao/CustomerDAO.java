@@ -10,7 +10,7 @@ import java.util.List;
 public class CustomerDAO {
 
     public Customer create(Customer c) throws SQLException {
-        String sql = "INSERT INTO customer(first_name,last_name,address) VALUES(?,?,?)";
+        String sql = "INSERT INTO customer(firstName,lastName,address) VALUES(?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, c.getFirstName());
@@ -31,7 +31,7 @@ public class CustomerDAO {
             ps.setLong(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next())
-                    return new Customer(rs.getString("first_name"), rs.getString("last_name"), rs.getString("address")) {{
+                    return new Customer(rs.getString("firstName"), rs.getString("lastName"), rs.getString("address")) {{
                         setId(rs.getLong("id"));
                     }};
             }
@@ -46,7 +46,7 @@ public class CustomerDAO {
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                Customer c = new Customer(rs.getString("first_name"), rs.getString("last_name"), rs.getString("address"));
+                Customer c = new Customer(rs.getString("firstName"), rs.getString("lastName"), rs.getString("address"));
                 c.setId(rs.getLong("id"));
                 list.add(c);
             }
@@ -55,7 +55,7 @@ public class CustomerDAO {
     }
 
     public boolean update(Customer c) throws SQLException {
-        String sql = "UPDATE customer SET first_name=?, last_name=?, address=? WHERE id=?";
+        String sql = "UPDATE customer SET firstName=?, lastName=?, address=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getFirstName());

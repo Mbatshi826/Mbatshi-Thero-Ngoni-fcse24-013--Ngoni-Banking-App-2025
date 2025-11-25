@@ -9,7 +9,7 @@ import util.DBConnection;
 
 public class TransactionDAO {
     public void recordTransaction(long accountId, BigDecimal amount, String type) throws SQLException {
-        String sql = "INSERT INTO transaction (account_id, amount, type, timestamp) VALUES (?, ?, ?, NOW())";
+        String sql = "INSERT INTO transaction (accountId, amount, type, timestamp) VALUES (?, ?, ?, NOW())";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, accountId);
