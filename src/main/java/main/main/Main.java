@@ -1,16 +1,39 @@
 package main.main;
 
+import org.mindrot.jbcrypt.BCrypt;
 import util.DBConnection;
 import view.App;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Main {
     public static void main(String[] args) {
         initDB();
+        addTestUser();
         App.main(args);
+    }
+
+    private static void addTestUser() {
+        String username = "testuser";
+        String password = "password123";
+        String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
+        String userType = "customer";
+
+        String sql = "INSERT INTO user (username, password_hash, user_type) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE password_hash = ?;";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.setString(2, passwordHash);
+            ps.setString(3, userType);
+            ps.setString(4, passwordHash);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void initDB() {
