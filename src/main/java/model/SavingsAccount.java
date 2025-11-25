@@ -11,7 +11,14 @@ public class SavingsAccount extends Account implements InterestBearing {
 
     @Override
     public boolean withdraw(BigDecimal amount) {
-        throw new UnsupportedOperationException("Withdrawals not allowed from SavingsAccount");
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be positive");
+        }
+        if (balance.compareTo(amount) < 0) {
+            return false; // Insufficient funds
+        }
+        balance = balance.subtract(amount);
+        return true;
     }
 
     @Override
@@ -24,7 +31,6 @@ public class SavingsAccount extends Account implements InterestBearing {
 
     @Override
     public String getBranch() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBranch'");
+        return super.getBranch();
     }
 }
