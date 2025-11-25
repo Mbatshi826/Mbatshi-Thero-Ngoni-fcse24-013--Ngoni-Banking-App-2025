@@ -1,6 +1,33 @@
 CREATE TABLE Customer (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    firstName VARCHAR(255),
-    lastName VARCHAR(255),
-    address VARCHAR(255)
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Account (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    accountNumber BIGINT NOT NULL UNIQUE,
+    customerId INT NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    balance DECIMAL(15, 2) NOT NULL,
+    branch VARCHAR(255) NOT NULL,
+    companyName VARCHAR(255),
+    FOREIGN KEY (customerId) REFERENCES Customer(id)
+);
+
+CREATE TABLE Transaction (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    accountId INT NOT NULL,
+    amount DECIMAL(15, 2) NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (accountId) REFERENCES Account(id)
+);
+
+CREATE TABLE User (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    passwordHash VARCHAR(255) NOT NULL,
+    userType VARCHAR(255) NOT NULL
 );
